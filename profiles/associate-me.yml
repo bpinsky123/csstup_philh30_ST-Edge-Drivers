@@ -1,18 +1,20 @@
 name: associate-me
 components:
 - id: main
-  label: Device Capabilities and Association Groups
+  label: Device capabilities and association groups
   capabilities:
   - id: platinummassive43262.deviceInformation
+    version: 1
+  - id: platinummassive43262.zwubCommandClasses
     version: 1
   - id: platinummassive43262.zwubAssociationGroups
     version: 1
   - id: refresh
     version: 1
   categories:
-  - name: Switch
+  - name: RemoteController
 - id: setAssociationGroup
-  label: Set Association Group
+  label: Set association group
   capabilities:
   - id: platinummassive43262.zwubAssociationGroup
     version: 1
@@ -21,4 +23,4 @@ components:
   - id: refresh
     version: 1
   categories:
-  - name: Switch
+  - name: RemoteController
