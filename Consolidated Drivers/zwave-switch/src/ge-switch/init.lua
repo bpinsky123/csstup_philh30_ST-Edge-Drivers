@@ -62,11 +62,12 @@ local GE_SWITCH_FINGERPRINTS = {
   {mfr = 0x0063, prod = 0x4944, model = 0x3237},
   {mfr = 0x0063, prod = 0x4944, model = 0x3333},
   {mfr = 0x0063, prod = 0x4944, model = 0x3334},
-  {mfr = 0x0063, prod = 0x4944, model = 0x3337},
+  {mfr = 0x0063, prod = 0x4944, model = 0x3337},  -- GE In-Wall Smart Fan Control
   {mfr = 0x0063, prod = 0x4944, model = 0x3339},
   {mfr = 0x0063, prod = 0x4944, model = 0x3430},  -- Enbrighten Dimmer 58438
   {mfr = 0x0063, prod = 0x4944, model = 0x3431},  -- Enbrighten Dimmer 59335
   {mfr = 0x0063, prod = 0x4944, model = 0x3433},  -- Enbrighten Dimmer 59350/ZWA3016
+  {mfr = 0x0063, prod = 0x4944, model = 0x3533},  -- GE In-Wall Smart Fan Control 58446/ZWA4013
   {mfr = 0x0063, prod = 0x4952, model = 0x3031},
   {mfr = 0x0063, prod = 0x4952, model = 0x3032},
   {mfr = 0x0063, prod = 0x4952, model = 0x3033},
@@ -394,6 +395,7 @@ local ge_switch = {
   },
   sub_drivers = {
     require("zwave-fan-3-speed"),
+    require("zwave-fan-4-speed"),
     require("ge-switch-dual"),
   },
   NAME = "ge zwave",
