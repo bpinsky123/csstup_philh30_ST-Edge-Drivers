@@ -161,7 +161,7 @@ zwaveManufacturer:
     manufacturerId: 0x0063
     productType: 0x4944
     productId: 0x3533
-    deviceProfileName: ge-fan-scene    
+    deviceProfileName: ge-fan-scene-v2
   - id: "0063/494D/3031"
     deviceLabel: GE Motion Switch 24770
     manufacturerId: 0x0063
