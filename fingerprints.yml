@@ -1,5 +1,10 @@
 zwaveGeneric:
-  - id: "Associate Me - Sleepy"
+  # These fingerprints are for manual driver assignment only.  Association
+  # remains required and isJoinable stays false, so this driver cannot claim a
+  # device during inclusion.
+  # Keep the original Association-only variants as a manual fallback for
+  # device classes not listed below.
+  - id: "Associator/AnyAssociation/Sleepy"
     deviceLabel: Z-Wave Utility Belt - Associator
     commandClasses:
       supported:
@@ -7,8 +12,193 @@ zwaveGeneric:
         - 0x85 # association
     deviceProfileName: associate-me-sleepy
     isJoinable: false
-  - id: "Associate Me"
+  - id: "Associator/AnyAssociation"
     deviceLabel: Z-Wave Utility Belt - Associator
+    commandClasses:
+      supported:
+        - 0x85 # association
+    deviceProfileName: associate-me
+    isJoinable: false
+  - id: "Associator/EntryControl0x40/Sleepy"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x40 # Entry Control / Door Lock
+    commandClasses:
+      supported:
+        - 0x84 # wakeup
+        - 0x85 # association
+    deviceProfileName: associate-me-sleepy
+    isJoinable: false
+  - id: "Associator/EntryControl0x40"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x40 # Entry Control / Door Lock
+    commandClasses:
+      supported:
+        - 0x85 # association
+    deviceProfileName: associate-me
+    isJoinable: false
+  - id: "Associator/Appliance/Sleepy"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x06 # Appliance
+    commandClasses:
+      supported:
+        - 0x84 # wakeup
+        - 0x85 # association
+    deviceProfileName: associate-me-sleepy
+    isJoinable: false
+  - id: "Associator/Appliance"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x06 # Appliance
+    commandClasses:
+      supported:
+        - 0x85 # association
+    deviceProfileName: associate-me
+    isJoinable: false
+  - id: "Associator/AlarmSensor/Sleepy"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x07 # Alarm Sensor
+    commandClasses:
+      supported:
+        - 0x84 # wakeup
+        - 0x85 # association
+    deviceProfileName: associate-me-sleepy
+    isJoinable: false
+  - id: "Associator/AlarmSensor"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x07 # Alarm Sensor
+    commandClasses:
+      supported:
+        - 0x85 # association
+    deviceProfileName: associate-me
+    isJoinable: false
+  - id: "Associator/Thermostat/Sleepy"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x08 # Thermostat
+    commandClasses:
+      supported:
+        - 0x84 # wakeup
+        - 0x85 # association
+    deviceProfileName: associate-me-sleepy
+    isJoinable: false
+  - id: "Associator/Thermostat"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x08 # Thermostat
+    commandClasses:
+      supported:
+        - 0x85 # association
+    deviceProfileName: associate-me
+    isJoinable: false
+  - id: "Associator/WindowCovering/Sleepy"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x09 # Window Covering
+    commandClasses:
+      supported:
+        - 0x84 # wakeup
+        - 0x85 # association
+    deviceProfileName: associate-me-sleepy
+    isJoinable: false
+  - id: "Associator/WindowCovering"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x09 # Window Covering
+    commandClasses:
+      supported:
+        - 0x85 # association
+    deviceProfileName: associate-me
+    isJoinable: false
+  - id: "Associator/BinarySwitch"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x10 # Binary Switch
+    commandClasses:
+      supported:
+        - 0x85 # association
+    deviceProfileName: associate-me
+    isJoinable: false
+  - id: "Associator/MultilevelSwitch"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x11 # Multilevel Switch
+    commandClasses:
+      supported:
+        - 0x85 # association
+    deviceProfileName: associate-me
+    isJoinable: false
+  - id: "Associator/RemoteSwitch/Sleepy"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x12 # Remote Switch Controller
+    commandClasses:
+      supported:
+        - 0x84 # wakeup
+        - 0x85 # association
+    deviceProfileName: associate-me-sleepy
+    isJoinable: false
+  - id: "Associator/RemoteSwitch"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x12 # Remote Switch Controller
+    commandClasses:
+      supported:
+        - 0x85 # association
+    deviceProfileName: associate-me
+    isJoinable: false
+  - id: "Associator/ToggleSwitch"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x13 # Toggle Switch
+    commandClasses:
+      supported:
+        - 0x85 # association
+    deviceProfileName: associate-me
+    isJoinable: false
+  - id: "Associator/BinarySensor/Sleepy"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x16 # Binary Sensor
+    commandClasses:
+      supported:
+        - 0x84 # wakeup
+        - 0x85 # association
+    deviceProfileName: associate-me-sleepy
+    isJoinable: false
+  - id: "Associator/BinarySensor"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x16 # Binary Sensor
+    commandClasses:
+      supported:
+        - 0x85 # association
+    deviceProfileName: associate-me
+    isJoinable: false
+  - id: "Associator/MultilevelSensor/Sleepy"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x17 # Multilevel Sensor
+    commandClasses:
+      supported:
+        - 0x84 # wakeup
+        - 0x85 # association
+    deviceProfileName: associate-me-sleepy
+    isJoinable: false
+  - id: "Associator/MultilevelSensor"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x17 # Multilevel Sensor
+    commandClasses:
+      supported:
+        - 0x85 # association
+    deviceProfileName: associate-me
+    isJoinable: false
+  - id: "Associator/Meter"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x18 # Meter
+    commandClasses:
+      supported:
+        - 0x85 # association
+    deviceProfileName: associate-me
+    isJoinable: false
+  - id: "Associator/EntryControl/Sleepy"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x20 # Entry Control
+    commandClasses:
+      supported:
+        - 0x84 # wakeup
+        - 0x85 # association
+    deviceProfileName: associate-me-sleepy
+    isJoinable: false
+  - id: "Associator/EntryControl"
+    deviceLabel: Z-Wave Utility Belt - Associator
+    genericType: 0x20 # Entry Control
     commandClasses:
       supported:
         - 0x85 # association
