@@ -32,6 +32,7 @@ local delay_send = require "delay_send"
 local json = require "st.json"
 
 local associationGroups = {}
+local associationReportFragments = {}
 local to_send_queue = {}
 local to_send_display = {}
 
@@ -39,36 +40,18 @@ capabilities[capdefs.associationGroups.name] = capdefs.associationGroups.capabil
 capabilities[capdefs.associationGroup.name] = capdefs.associationGroup.capability
 capabilities[capdefs.associationSet.name] = capdefs.associationSet.capability
 
-local function table_header(row_items)
-  local row = '<tr>'
-  for _,item in pairs(row_items) do
-    row = row .. '<th>' .. (item or '') .. '</th>'
-  end
-  row = row .. '</tr>'
-  return row
-end
-
-local function table_row(row_items)
-  local row = '<tr>'
-  for _,item in pairs(row_items) do
-    row = row .. '<td>' .. (item or '') .. '</td>'
-  end
-  row = row .. '</tr>'
-  return row
-end
-
 local function update_queue_table(device)
   local this_device = device.device_network_id
-  local queued_cmds = '<table style="font-size:65%;width:100%">'
+  local queued_cmds
   if to_send_display[this_device] and #to_send_display[this_device] > 0 then
-    for _, d in ipairs(to_send_display[this_device]) do
-      queued_cmds = queued_cmds .. table_row({d})
-    end
+    queued_cmds = table.concat(to_send_display[this_device], '\n')
   else
-    queued_cmds = queued_cmds .. table_row({'No commands in queue'})
+    queued_cmds = 'No commands in queue'
   end
-  queued_cmds = queued_cmds .. '</table>'
-  device:emit_component_event(device.profile.components['queue'],capdefs.messageQueue.queue({value = queued_cmds},{visibility = {displayed = false}}))
+  device:emit_component_event(
+    device.profile.components['queue'],
+    capdefs.messageQueue.queue({value = queued_cmds}, {visibility = {displayed = false}})
+  )
 end
 
 local function send_queue(device,commands,delay,description)
@@ -93,59 +76,67 @@ end
 
 local function update_group_table(device)
   local this_device = device.device_network_id
-  local group_table = '<table style="font-size:65%;width:100%">'
-  for group, data in pairs(associationGroups[this_device]) do
-    group_table = group_table .. table_row({'Group ' .. group .. ': ' .. (data.name or 'Unknown')})
-    local profile = (data.profile1 and data.profile2) and (AssociationGrpInfo._reflect_profile1[data.profile1]  .. ': ' .. AssociationGrpInfo._reflect_profile2[data.profile1][data.profile2]) or nil
-    if profile then group_table = group_table .. table_row({'Profile: ' .. profile}) end
-    group_table = group_table .. table_row({'Max Nodes: ' .. (data.max or 'Unknown')})
-    group_table = group_table .. table_row({'Nodes: ' .. (data.nodes and ((data.nodes == '') and 'None' or data.nodes) or 'Unknown')})
-    group_table = group_table .. table_row({''})
+  local selected_group_value = device:get_latest_state(
+    'setAssociationGroup', capdefs.associationGroup.name, 'associationGroup'
+  )
+  local selected_group = tonumber(selected_group_value) or 1
+  local data = (associationGroups[this_device] or {})[selected_group]
+  local group_text
+
+  if data then
+    local name = data.name or 'Unknown'
+    local profile1 = data.profile1 and AssociationGrpInfo._reflect_profile1[data.profile1]
+    local profile2_map = data.profile1 and AssociationGrpInfo._reflect_profile2[data.profile1]
+    local profile2 = profile2_map and data.profile2 and profile2_map[data.profile2]
+    if name == 'Unknown' and profile1 and profile2 then
+      name = profile1 .. ': ' .. profile2
+    end
+    local nodes = data.nodes and (data.nodes == '' and 'None' or data.nodes) or 'Unknown'
+    group_text = string.format('Group %d · %s · Max %s · Nodes %s',
+      selected_group, name, tostring(data.max or 'Unknown'), nodes)
+  else
+    group_text = string.format('Group %d · awaiting report', selected_group)
   end
-  group_table = group_table .. '</table>'
-  local evt = capabilities[capdefs.associationGroups.name].associationGroups({value = group_table})
+
+  local evt = capabilities[capdefs.associationGroups.name].associationGroups({value = group_text})
   evt.visibility = {displayed = false}
   device:emit_event(evt)
 end
 
 local function update_device_info_table(device)
-  local device_table = '<table style="font-size:65%;width:100%">'
-  device_table = device_table .. table_row({'Device Network ID: [' .. device.device_network_id .. ']'})
-  device_table = device_table .. table_row({'Fingerprint: ' .. string.format('%04X',(device.st_store or {}).zwave_manufacturer_id) .. '-' .. string.format('%04X',(device.st_store or {}).zwave_product_type) .. '-' .. string.format('%04X',(device.st_store or {}).zwave_product_id)})
-  local fw_major = (((device.st_store or {}).zwave_version or {}).firmware or {}).major
-  local fw_minor = (((device.st_store or {}).zwave_version or {}).firmware or {}).minor
+  local store = device.st_store or {}
+  local function hex_or_unknown(value, width)
+    return type(value) == 'number' and string.format('%0' .. width .. 'X', value) or 'Unknown'
+  end
+  local device_info = 'DNI ' .. device.device_network_id
+    .. ' · ' .. hex_or_unknown(store.zwave_manufacturer_id, 4)
+    .. '-' .. hex_or_unknown(store.zwave_product_type, 4)
+    .. '-' .. hex_or_unknown(store.zwave_product_id, 4)
+  local firmware = (store.zwave_version or {}).firmware or {}
+  local fw_major = firmware.major
+  local fw_minor = firmware.minor
   if fw_major and fw_minor then
-    device_table = device_table .. table_row({'Firmware: ' .. fw_major .. '.' .. string.format('%02d',fw_minor)})
+    device_info = device_info .. ' · FW ' .. fw_major .. '.' .. string.format('%02d', fw_minor)
   end
-  local security
-  if (device.st_store or {}).zwave_security_flags then
-    for _,flag in pairs((device.st_store or {}).zwave_security_flags) do
-      security = (security and (security .. ', ') or '') .. flag
-    end
+  local security = {}
+  for _, flag in pairs(store.zwave_security_flags or {}) do
+    table.insert(security, flag)
   end
-  device_table = device_table .. table_row({'Security Level: ' .. security})
-  local mesh = json.decode((device.st_store.data or {}).meshInfo)
-  local route = '[' .. device.device_network_id .. '] <-> ['
-  for _, node in ipairs(mesh.route) do
-    route = route .. node.deviceId .. '] <-> ['
-  end
-  local hubnode = device.driver.environment_info.hub_zwave_id or 1
-  route = route .. string.format('%02X',hubnode) .. ']'
-  device_table = device_table .. table_row({'Route: ' .. route})
-  local metrics = string.format('Transmitted: %s  Received: %s  Failed: %s', mesh.metrics.totalTransmittedMessages, mesh.metrics.totalReceivedMessages, mesh.metrics.transmitFailures)
-  device_table = device_table .. table_row({metrics})
-  local evt = capdefs.deviceInfo.deviceInformation({value = device_table})
+  device_info = device_info .. ' · ' .. (#security > 0 and table.concat(security, ', ') or 'Security unknown')
+
+  local evt = capdefs.deviceInfo.deviceInformation({value = device_info})
   evt.visibility = {displayed = false}
   device:emit_event(evt)
-  local cc_list = {cc.ASSOCIATION,cc.MULTI_CHANNEL_ASSOCIATION,cc.ASSOCIATION_GRP_INFO,cc.ASSOCIATION_COMMAND_CONFIGURATION}
-  local cc_table = '<table style="font-size:65%;width:100%">'
+  local cc_list = {cc.ASSOCIATION, cc.MULTI_CHANNEL_ASSOCIATION, cc.ASSOCIATION_GRP_INFO, cc.ASSOCIATION_COMMAND_CONFIGURATION}
+  local cc_lines = {}
   for _, c in ipairs(cc_list) do
     if device:is_cc_supported(c) then
-      cc_table = cc_table .. table_row({string.format('%02X',c),cc._classes[c]})
+      table.insert(cc_lines, string.format('%02X %s', c, tostring(cc._classes[c] or 'Unknown')))
     end
   end
-  cc_table = cc_table .. '</table>'
-  evt = capdefs.commandClasses.commandClasses({value = cc_table})
+  evt = capdefs.commandClasses.commandClasses({
+    value = #cc_lines > 0 and table.concat(cc_lines, ' · ') or 'No association command classes reported'
+  })
   evt.visibility = {displayed = false}
   device:emit_event(evt)
 end
@@ -156,7 +147,10 @@ local function init(driver, device)
   if device:is_cc_supported(cc.WAKE_UP) then
     update_queue_table(device)
   end
-  update_device_info_table(device)
+  local ok, err = pcall(update_device_info_table, device)
+  if not ok then
+    log.warn(string.format("Unable to update device information: %s", tostring(err)))
+  end
 end
 
 --- @param driver st.zwave.Driver
@@ -176,6 +170,7 @@ end
 local function removed(driver, device)
   local this_device = device.device_network_id
   associationGroups[this_device] = nil
+  associationReportFragments[this_device] = nil
   to_send_queue[this_device] = nil
 end
 
@@ -184,25 +179,53 @@ end
 --- @param driver st.zwave.Driver
 --- @param device st.zwave.Device
 --- @param command st.zwave.CommandClass.Association.Report
+local function finish_association_report(device, group, max_nodes, nodes, report_kind, reports_to_follow)
+  local this_device = device.device_network_id
+  associationReportFragments[this_device] = associationReportFragments[this_device] or {}
+  local key = report_kind .. ':' .. group
+  local fragment = associationReportFragments[this_device][key] or { nodes = {} }
+
+  fragment.max = max_nodes or fragment.max
+  for _, node in ipairs(nodes) do
+    table.insert(fragment.nodes, node)
+  end
+
+  if (tonumber(reports_to_follow) or 0) > 0 then
+    associationReportFragments[this_device][key] = fragment
+    return
+  end
+
+  associationReportFragments[this_device][key] = nil
+  associationGroups[this_device] = associationGroups[this_device] or {}
+  associationGroups[this_device][group] = associationGroups[this_device][group] or {}
+  associationGroups[this_device][group].max = fragment.max or 'Unknown'
+  associationGroups[this_device][group].nodes = table.concat(fragment.nodes, ',')
+
+  local node_list = associationGroups[this_device][group].nodes
+  if node_list == '' then node_list = 'None' end
+  local requested_group = device:get_latest_state('setAssociationGroup', capdefs.associationGroup.name, 'associationGroup')
+  if group == requested_group then
+    local event = capabilities[capdefs.associationSet.name].associationSet({value = node_list})
+    event.visibility = {displayed = false}
+    event.state_change = true
+    device:emit_component_event(
+      device.profile.components['setAssociationGroup'],
+      event
+    )
+  end
+  update_group_table(device)
+end
+
 local function assoc_report(driver, device, command)
   log.trace('Association Report received')
   local group = tonumber(command.args.grouping_identifier)
-  local requested_group = device:get_latest_state('setAssociationGroup',capdefs.associationGroup.name,'associationGroup')
-  local max_nodes = command.args.max_nodes_supported .. ''
-  local node_list = ''
-  for n, node in ipairs(command.args.node_ids) do
-    node_list = node_list .. ((#node_list > 0) and ',' or '') .. string.format('%02X',node)
+  if not group then return end
+  local nodes = {}
+  for _, node in ipairs(command.args.node_ids or {}) do
+    table.insert(nodes, string.format('%02X', node))
   end
-  local this_device = device.device_network_id
-  associationGroups[this_device] = associationGroups[this_device] or {}
-  associationGroups[this_device][group] = associationGroups[this_device][group] or {}
-  associationGroups[this_device][group].max = max_nodes
-  associationGroups[this_device][group].nodes = node_list
-  if node_list == "" then node_list = 'None' end
-  if group == requested_group then
-    device:emit_component_event(device.profile.components['setAssociationGroup'],capabilities[capdefs.associationSet.name].associationSet({value = node_list},{visibility = {displayed = false}}))
-  end
-  update_group_table(device)
+  finish_association_report(device, group, tostring(command.args.max_nodes_supported or 'Unknown'), nodes,
+    'association', command.args.reports_to_follow)
 end
 
 --- MultiChannelAssociation:Report handler
@@ -213,25 +236,16 @@ end
 local function multi_assoc_report(driver, device, command)
   log.trace('Association Report received')
   local group = tonumber(command.args.grouping_identifier)
-  local requested_group = device:get_latest_state('setAssociationGroup',capdefs.associationGroup.name,'associationGroup')
-  local max_nodes = command.args.max_nodes_supported .. ''
-  local node_list = ''
-  for _, node in ipairs(command.args.node_ids) do
-    node_list = node_list .. ((#node_list > 0) and ',' or '') .. string.format('%02X',node)
+  if not group then return end
+  local nodes = {}
+  for _, node in ipairs(command.args.node_ids or {}) do
+    table.insert(nodes, string.format('%02X', node))
   end
-  for _, node in ipairs(command.args.multi_channel_nodes) do
-    node_list = node_list .. ((#node_list > 0) and ',' or '') .. string.format('%02X',node.multi_channel_node_id) .. ':' .. string.format('%02X',node.end_point)
+  for _, node in ipairs(command.args.multi_channel_nodes or {}) do
+    table.insert(nodes, string.format('%02X:%02X', node.multi_channel_node_id, node.end_point))
   end
-  local this_device = device.device_network_id
-  associationGroups[this_device] = associationGroups[this_device] or {}
-  associationGroups[this_device][group] = associationGroups[this_device][group] or {}
-  associationGroups[this_device][group].max = max_nodes
-  associationGroups[this_device][group].nodes = node_list
-  if node_list == "" then node_list = 'None' end
-  if group == requested_group then
-    device:emit_component_event(device.profile.components['setAssociationGroup'],capabilities[capdefs.associationSet.name].associationSet({value = node_list},{visibility = {displayed = false}}))
-  end
-  update_group_table(device)
+  finish_association_report(device, group, tostring(command.args.max_nodes_supported or 'Unknown'), nodes,
+    'multi', command.args.reports_to_follow)
 end
 
 --- AssociationGroupInfo:GroupNameReport handler
@@ -257,13 +271,19 @@ end
 --- @param command st.zwave.CommandClass.AssociationGrpInfo.AssociationGroupInfoReport
 local function assoc_info_report(driver, device, command)
   log.trace('Association Group Info Report received')
-  local group = tonumber(command.args.groups[1].grouping_identifier)
   local this_device = device.device_network_id
   associationGroups[this_device] = associationGroups[this_device] or {}
-  associationGroups[this_device][group] = associationGroups[this_device][group] or {}
-  associationGroups[this_device][group].profile1 = command.args.groups[1].profile1
-  associationGroups[this_device][group].profile2 = command.args.groups[1].profile2
-  update_group_table(device)
+  local updated = false
+  for _, group_info in ipairs(command.args.groups or {}) do
+    local group = tonumber(group_info.grouping_identifier)
+    if group then
+      associationGroups[this_device][group] = associationGroups[this_device][group] or {}
+      associationGroups[this_device][group].profile1 = group_info.profile1
+      associationGroups[this_device][group].profile2 = group_info.profile2
+      updated = true
+    end
+  end
+  if updated then update_group_table(device) end
 end
 
 --- Association:GroupingsReport handler
@@ -289,10 +309,12 @@ local function assoc_group_report(driver, device, command)
         table.insert(cmds,Association:Get({grouping_identifier = i}))
         table.insert(desc,'Assoc Get - Group ' .. i)
       end
-      table.insert(cmds,AssociationGrpInfo:AssociationGroupNameGet({grouping_identifier = i}))
-      table.insert(cmds,AssociationGrpInfo:AssociationGroupInfoGet({grouping_identifier = i}))
-      table.insert(desc,'Assoc Group Name Get - Group ' .. i)
-      table.insert(desc,'Assoc Group Info Get - Group ' .. i)
+      if device:is_cc_supported(cc.ASSOCIATION_GRP_INFO) then
+        table.insert(cmds,AssociationGrpInfo:AssociationGroupNameGet({grouping_identifier = i}))
+        table.insert(cmds,AssociationGrpInfo:AssociationGroupInfoGet({grouping_identifier = i}))
+        table.insert(desc,'Assoc Group Name Get - Group ' .. i)
+        table.insert(desc,'Assoc Group Info Get - Group ' .. i)
+      end
     end
   else
     update_group_table(device)
@@ -311,6 +333,7 @@ local function wakeup_notification(driver, device, command)
   for _, cmd in ipairs(to_send_queue[this_device] or {}) do
     device:send(cmd)
   end
+  device:send(WakeUp:NoMoreInformation({}))
   to_send_queue[this_device] = nil
   to_send_display[this_device] = nil
   update_queue_table(device)
@@ -324,8 +347,15 @@ local function get_association_group(driver, device, command)
   local cmds = {}
   local desc = {}
   log.debug(string.format('Fetching data for Association Group %s',group))
-  device:emit_component_event(device.profile.components['setAssociationGroup'],capabilities[capdefs.associationGroup.name].associationGroup({value = group},{visibility = {displayed = false}}))
-  device:emit_component_event(device.profile.components['setAssociationGroup'],capabilities[capdefs.associationSet.name].associationSet({value = 'Fetching nodes...'},{visibility = {displayed = false}}))
+  local group_event = capabilities[capdefs.associationGroup.name].associationGroup({value = group})
+  group_event.visibility = {displayed = false}
+  group_event.state_change = true
+  device:emit_component_event(device.profile.components['setAssociationGroup'], group_event)
+
+  local nodes_event = capabilities[capdefs.associationSet.name].associationSet({value = 'Fetching nodes...'})
+  nodes_event.visibility = {displayed = false}
+  nodes_event.state_change = true
+  device:emit_component_event(device.profile.components['setAssociationGroup'], nodes_event)
   if supports_multi then
     table.insert(cmds,MultiChannelAssociation:Get({grouping_identifier = group}))
     table.insert(desc,'Multi-Channel Assoc Get - Group ' .. group)
@@ -333,10 +363,12 @@ local function get_association_group(driver, device, command)
     table.insert(cmds,Association:Get({grouping_identifier = group}))
     table.insert(desc,'Assoc Get - Group ' .. group)
   end
-  table.insert(cmds,AssociationGrpInfo:AssociationGroupNameGet({grouping_identifier = group}))
-  table.insert(cmds,AssociationGrpInfo:AssociationGroupInfoGet({grouping_identifier = group}))
-  table.insert(desc,'Assoc Group Name Get - Group ' .. group)
-  table.insert(desc,'Assoc Group Info Get - Group ' .. group)
+  if device:is_cc_supported(cc.ASSOCIATION_GRP_INFO) then
+    table.insert(cmds,AssociationGrpInfo:AssociationGroupNameGet({grouping_identifier = group}))
+    table.insert(cmds,AssociationGrpInfo:AssociationGroupInfoGet({grouping_identifier = group}))
+    table.insert(desc,'Assoc Group Name Get - Group ' .. group)
+    table.insert(desc,'Assoc Group Info Get - Group ' .. group)
+  end
   send_queue(device,cmds,1,desc)
 end
 
@@ -344,7 +376,13 @@ end
 --- @param device st.zwave.Device
 local function refresh_handler(driver,device,command)
   local supports_multi = device:is_cc_supported(cc.MULTI_CHANNEL_ASSOCIATION)
-  update_device_info_table(device)
+  -- Device information is supplementary. Older versions of the runtime can
+  -- expose one of the fields used by the HTML table as userdata; do not let
+  -- that prevent the association queries below from being sent.
+  local ok, err = pcall(update_device_info_table, device)
+  if not ok then
+    log.warn(string.format("Unable to update device information: %s", tostring(err)))
+  end
   local group = 1
   if not device:get_latest_state('setAssociationGroup',capdefs.associationGroup.name,'associationGroup') then
     device:emit_component_event(device.profile.components['setAssociationGroup'],capabilities[capdefs.associationGroup.name].associationGroup({value = 1},{visibility = {displayed = false}}))
@@ -361,10 +399,12 @@ local function refresh_handler(driver,device,command)
     table.insert(cmds,Association:Get({grouping_identifier = group}))
     table.insert(desc,'Assoc Get - Group ' .. group)
   end
-  table.insert(cmds,AssociationGrpInfo:AssociationGroupNameGet({grouping_identifier = group}))
-  table.insert(cmds,AssociationGrpInfo:AssociationGroupInfoGet({grouping_identifier = group}))
-  table.insert(desc,'Assoc Group Name Get - Group ' .. group)
-  table.insert(desc,'Assoc Group Info Get - Group ' .. group)
+  if device:is_cc_supported(cc.ASSOCIATION_GRP_INFO) then
+    table.insert(cmds,AssociationGrpInfo:AssociationGroupNameGet({grouping_identifier = group}))
+    table.insert(cmds,AssociationGrpInfo:AssociationGroupInfoGet({grouping_identifier = group}))
+    table.insert(desc,'Assoc Group Name Get - Group ' .. group)
+    table.insert(desc,'Assoc Group Info Get - Group ' .. group)
+  end
   send_queue(device,cmds,1,desc)
 end
 
@@ -375,7 +415,10 @@ local function association_set_handler(driver,device,command)
   local desc = {}
   local nodes = command.args.associationSet
   local supports_multi = device:is_cc_supported(cc.MULTI_CHANNEL_ASSOCIATION)
-  device:emit_component_event(device.profile.components['setAssociationGroup'],capabilities[capdefs.associationSet.name].associationSet({value = nodes},{visibility = {displayed = false}}))
+  local event = capabilities[capdefs.associationSet.name].associationSet({value = nodes})
+  event.visibility = {displayed = false}
+  event.state_change = true
+  device:emit_component_event(device.profile.components['setAssociationGroup'], event)
   local node_list,multi_nodes = splitAssocString(nodes,',',5,false,supports_multi)
   local group = device:get_latest_state('setAssociationGroup',capdefs.associationGroup.name,'associationGroup')
   if supports_multi then
@@ -393,7 +436,7 @@ local function association_set_handler(driver,device,command)
     for _,n in ipairs(multi_nodes) do
       nodes_desc = nodes_desc .. ((#nodes_desc > 0) and ',' or '') .. string.format('%02X',n.multi_channel_node_id) .. ':' .. string.format('%02X',n.end_point)
     end
-    if #multi_nodes > 0 then
+    if supports_multi then
       table.insert(cmds,MultiChannelAssociation:Set({grouping_identifier = group, node_ids = node_list, multi_channel_nodes = multi_nodes}))
       table.insert(desc,'Multi-Channel Assoc Set - Group ' .. group .. ' Nodes: ' .. nodes_desc)
     else
