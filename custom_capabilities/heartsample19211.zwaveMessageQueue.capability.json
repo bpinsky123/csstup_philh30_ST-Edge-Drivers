@@ -1,0 +1,21 @@
+{
+  "name": "ZWave Message Queue",
+  "attributes": {
+    "queue": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "value"
+        ]
+      },
+      "enumCommands": []
+    }
+  },
+  "commands": {}
+}

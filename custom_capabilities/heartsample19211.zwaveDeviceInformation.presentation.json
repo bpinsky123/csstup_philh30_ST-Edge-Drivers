@@ -1,0 +1,22 @@
+{
+  "dashboard": {
+    "states": [],
+    "actions": [],
+    "panelItems": []
+  },
+  "detailView": [
+    {
+      "label": "Device information",
+      "displayType": "state",
+      "state": {
+        "label": "{{deviceInformation.value}}"
+      }
+    }
+  ],
+  "automation": {
+    "conditions": [],
+    "actions": []
+  },
+  "id": "heartsample19211.zwaveDeviceInformation",
+  "version": 1
+}

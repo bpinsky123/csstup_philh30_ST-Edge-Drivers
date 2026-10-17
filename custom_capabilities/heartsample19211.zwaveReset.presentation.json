@@ -1,0 +1,47 @@
+{
+  "dashboard": {
+    "states": [
+      {
+        "label": "Reset"
+      }
+    ],
+    "actions": [
+      {
+        "displayType": "pushButton",
+        "pushButton": {
+          "command": "reset"
+        }
+      }
+    ],
+    "panelItems": []
+  },
+  "detailView": [
+    {
+      "label": "Reset",
+      "displayType": "pushButton",
+      "pushButton": {
+        "command": "reset"
+      }
+    }
+  ],
+  "automation": {
+    "conditions": [],
+    "actions": [
+      {
+        "label": "Reset",
+        "displayType": "list",
+        "list": {
+          "alternatives": [
+            {
+              "key": "reset",
+              "value": "Reset",
+              "type": "active"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "id": "heartsample19211.zwaveReset",
+  "version": 1
+}

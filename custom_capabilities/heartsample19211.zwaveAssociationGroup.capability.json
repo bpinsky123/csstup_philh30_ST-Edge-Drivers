@@ -1,0 +1,40 @@
+{
+  "name": "ZWave Association Group",
+  "attributes": {
+    "associationGroup": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "value"
+        ]
+      },
+      "setter": "getAssociationGroup",
+      "enumCommands": []
+    }
+  },
+  "commands": {
+    "getAssociationGroup": {
+      "name": "getAssociationGroup",
+      "arguments": [
+        {
+          "name": "associationGroup",
+          "optional": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        }
+      ],
+      "sensitive": false
+    }
+  }
+}

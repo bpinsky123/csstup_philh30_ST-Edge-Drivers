@@ -74,28 +74,35 @@ local function send_queue(device,commands,delay,description)
   end
 end
 
-local function update_group_table(device)
-  local this_device = device.device_network_id
-  local selected_group_value = device:get_latest_state(
-    'setAssociationGroup', capdefs.associationGroup.name, 'associationGroup'
-  )
-  local selected_group = tonumber(selected_group_value) or 1
-  local data = (associationGroups[this_device] or {})[selected_group]
-  local group_text
+local function group_summary(group, data)
+  local name = data.name or 'Unknown'
+  local profile1 = data.profile1 and AssociationGrpInfo._reflect_profile1[data.profile1]
+  local profile2_map = data.profile1 and AssociationGrpInfo._reflect_profile2[data.profile1]
+  local profile2 = profile2_map and data.profile2 and profile2_map[data.profile2]
+  if name == 'Unknown' and profile1 and profile2 then
+    name = profile1 .. ': ' .. profile2
+  end
+  name = name:gsub(' control$', '')
+  return string.format('%d %s', group, name)
+end
 
-  if data then
-    local name = data.name or 'Unknown'
-    local profile1 = data.profile1 and AssociationGrpInfo._reflect_profile1[data.profile1]
-    local profile2_map = data.profile1 and AssociationGrpInfo._reflect_profile2[data.profile1]
-    local profile2 = profile2_map and data.profile2 and profile2_map[data.profile2]
-    if name == 'Unknown' and profile1 and profile2 then
-      name = profile1 .. ': ' .. profile2
-    end
-    local nodes = data.nodes and (data.nodes == '' and 'None' or data.nodes) or 'Unknown'
-    group_text = string.format('Group %d · %s · Max %s · Nodes %s',
-      selected_group, name, tostring(data.max or 'Unknown'), nodes)
+local function update_group_table(device)
+  local groups = associationGroups[device.device_network_id] or {}
+  local group_numbers = {}
+  for group, _ in pairs(groups) do
+    table.insert(group_numbers, group)
+  end
+  table.sort(group_numbers)
+
+  local group_text
+  if #group_numbers == 0 then
+    group_text = 'No association groups reported yet'
   else
-    group_text = string.format('Group %d · awaiting report', selected_group)
+    local summaries = {}
+    for _, group in ipairs(group_numbers) do
+      table.insert(summaries, group_summary(group, groups[group]))
+    end
+    group_text = 'Groups: ' .. table.concat(summaries, ' · ')
   end
 
   local evt = capabilities[capdefs.associationGroups.name].associationGroups({value = group_text})
@@ -108,21 +115,19 @@ local function update_device_info_table(device)
   local function hex_or_unknown(value, width)
     return type(value) == 'number' and string.format('%0' .. width .. 'X', value) or 'Unknown'
   end
-  local device_info = 'DNI ' .. device.device_network_id
-    .. ' · ' .. hex_or_unknown(store.zwave_manufacturer_id, 4)
-    .. '-' .. hex_or_unknown(store.zwave_product_type, 4)
-    .. '-' .. hex_or_unknown(store.zwave_product_id, 4)
+  local device_info = 'Mfr:' .. hex_or_unknown(store.zwave_manufacturer_id, 4)
+    .. ' · Mdl:' .. hex_or_unknown(store.zwave_product_id, 4)
   local firmware = (store.zwave_version or {}).firmware or {}
   local fw_major = firmware.major
   local fw_minor = firmware.minor
   if fw_major and fw_minor then
-    device_info = device_info .. ' · FW ' .. fw_major .. '.' .. string.format('%02d', fw_minor)
+    device_info = device_info .. ' · FW:' .. fw_major .. '.' .. string.format('%02d', fw_minor)
   end
   local security = {}
   for _, flag in pairs(store.zwave_security_flags or {}) do
     table.insert(security, flag)
   end
-  device_info = device_info .. ' · ' .. (#security > 0 and table.concat(security, ', ') or 'Security unknown')
+  device_info = device_info .. ' · Sec:' .. (#security > 0 and table.concat(security, ',') or 'unknown')
 
   local evt = capdefs.deviceInfo.deviceInformation({value = device_info})
   evt.visibility = {displayed = false}
@@ -375,6 +380,12 @@ end
 --- @param driver st.zwave.Driver
 --- @param device st.zwave.Device
 local function refresh_handler(driver,device,command)
+  -- Pull-down refresh is delivered to every component that exposes refresh.
+  -- The main component performs the one complete association scan.
+  if command.component ~= 'main' then
+    return
+  end
+
   local supports_multi = device:is_cc_supported(cc.MULTI_CHANNEL_ASSOCIATION)
   -- Device information is supplementary. Older versions of the runtime can
   -- expose one of the fields used by the HTML table as userdata; do not let

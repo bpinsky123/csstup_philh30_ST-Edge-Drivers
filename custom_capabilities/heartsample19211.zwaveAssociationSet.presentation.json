@@ -1,0 +1,25 @@
+{
+  "dashboard": {
+    "states": [],
+    "actions": [],
+    "panelItems": []
+  },
+  "detailView": [
+    {
+      "label": "Set association",
+      "displayType": "textField",
+      "textField": {
+        "command": "setNodes",
+        "argumentType": "string",
+        "value": "associationSet.value",
+        "valueType": "string"
+      }
+    }
+  ],
+  "automation": {
+    "conditions": [],
+    "actions": []
+  },
+  "id": "heartsample19211.zwaveAssociationSet",
+  "version": 1
+}
