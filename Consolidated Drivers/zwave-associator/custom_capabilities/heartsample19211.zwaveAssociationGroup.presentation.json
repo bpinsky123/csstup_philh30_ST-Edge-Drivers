@@ -1,0 +1,29 @@
+{
+  "dashboard": {
+    "states": [],
+    "actions": [],
+    "panelItems": []
+  },
+  "detailView": [
+    {
+      "label": "Select group",
+      "displayType": "numberField",
+      "numberField": {
+        "value": "associationGroup.value",
+        "valueType": "integer",
+        "command": "getAssociationGroup",
+        "argumentType": "integer",
+        "range": [
+          0,
+          255
+        ]
+      }
+    }
+  ],
+  "automation": {
+    "conditions": [],
+    "actions": []
+  },
+  "id": "heartsample19211.zwaveAssociationGroup",
+  "version": 1
+}

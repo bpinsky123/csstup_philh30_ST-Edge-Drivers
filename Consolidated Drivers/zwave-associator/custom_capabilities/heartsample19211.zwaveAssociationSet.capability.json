@@ -1,0 +1,36 @@
+{
+  "name": "ZWave Association Set",
+  "attributes": {
+    "associationSet": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "value"
+        ]
+      },
+      "setter": "setNodes",
+      "enumCommands": []
+    }
+  },
+  "commands": {
+    "setNodes": {
+      "name": "setNodes",
+      "arguments": [
+        {
+          "name": "associationSet",
+          "optional": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "sensitive": false
+    }
+  }
+}

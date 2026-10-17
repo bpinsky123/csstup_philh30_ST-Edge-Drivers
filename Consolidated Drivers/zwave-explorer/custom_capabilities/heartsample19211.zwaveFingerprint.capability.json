@@ -1,0 +1,21 @@
+{
+  "name": "Zwave Fingerprint",
+  "attributes": {
+    "fingerprint": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "value"
+        ]
+      },
+      "enumCommands": []
+    }
+  },
+  "commands": {}
+}

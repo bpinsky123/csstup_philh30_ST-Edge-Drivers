@@ -1,24 +1,24 @@
 local capabilities = require('st.capabilities')
 local capabilitydefs = {}
 
-capabilitydefs.deviceInfo = capabilities['platinummassive43262.deviceInformation']
+capabilitydefs.deviceInfo = capabilities['heartsample19211.zwaveDeviceInformation']
 
 capabilitydefs.associationGroups = {}
-capabilitydefs.associationGroups.name = "platinummassive43262.zwubAssociationGroups"
+capabilitydefs.associationGroups.name = "heartsample19211.zwaveAssociationGroups"
 capabilitydefs.associationGroups.capability = capabilities[capabilitydefs.associationGroups.name]
 
 capabilitydefs.associationGroup = {}
-capabilitydefs.associationGroup.name = "platinummassive43262.zwubAssociationGroup"
+capabilitydefs.associationGroup.name = "heartsample19211.zwaveAssociationGroup"
 capabilitydefs.associationGroup.capability = capabilities[capabilitydefs.associationGroup.name]
 
 capabilitydefs.associationSet = {}
-capabilitydefs.associationSet.name = "platinummassive43262.zwubAssociationSet"
+capabilitydefs.associationSet.name = "heartsample19211.zwaveAssociationSet"
 capabilitydefs.associationSet.capability = capabilities[capabilitydefs.associationSet.name]
 
-capabilitydefs.commandClasses = capabilities["platinummassive43262.zwubCommandClasses"]
+capabilitydefs.commandClasses = capabilities["heartsample19211.zwaveCommandClasses"]
 
-capabilitydefs.messageQueue = capabilities["platinummassive43262.zwubMessageQueue"]
+capabilitydefs.messageQueue = capabilities["heartsample19211.zwaveMessageQueue"]
 
-capabilitydefs.reset = capabilities["platinummassive43262.reset"]
+capabilitydefs.reset = capabilities["heartsample19211.zwaveReset"]
 
 return capabilitydefs
