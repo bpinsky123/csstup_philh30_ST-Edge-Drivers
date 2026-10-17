@@ -1,0 +1,22 @@
+{
+  "dashboard": {
+    "states": [],
+    "actions": [],
+    "panelItems": []
+  },
+  "detailView": [
+    {
+      "label": "Supported command classes 5",
+      "displayType": "state",
+      "state": {
+        "label": "{{commandClasses.value}}"
+      }
+    }
+  ],
+  "automation": {
+    "conditions": [],
+    "actions": []
+  },
+  "id": "heartsample19211.zwaveCommandClasses5",
+  "version": 1
+}

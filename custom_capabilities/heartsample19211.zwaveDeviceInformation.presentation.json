@@ -1,0 +1,50 @@
+{
+  "dashboard": {
+    "states": [],
+    "actions": [],
+    "panelItems": []
+  },
+  "detailView": [
+    {
+      "label": "Fingerprint",
+      "displayType": "state",
+      "state": {
+        "label": "{{fingerprint.value}}"
+      }
+    },
+    {
+      "label": "Firmware",
+      "displayType": "state",
+      "state": {
+        "label": "{{firmware.value}}"
+      }
+    },
+    {
+      "label": "Security",
+      "displayType": "state",
+      "state": {
+        "label": "{{security.value}}"
+      }
+    },
+    {
+      "label": "Route",
+      "displayType": "state",
+      "state": {
+        "label": "{{route.value}}"
+      }
+    },
+    {
+      "label": "Traffic",
+      "displayType": "state",
+      "state": {
+        "label": "{{traffic.value}}"
+      }
+    }
+  ],
+  "automation": {
+    "conditions": [],
+    "actions": []
+  },
+  "id": "heartsample19211.zwaveDeviceInformation",
+  "version": 1
+}

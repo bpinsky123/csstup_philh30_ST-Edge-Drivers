@@ -3,9 +3,29 @@ components:
 - id: main
   label: Device capabilities and association groups
   capabilities:
-  - id: platinummassive43262.deviceInformation
+  - id: heartsample19211.zwaveFingerprint
     version: 1
-  - id: platinummassive43262.zwubCommandClasses
+  - id: heartsample19211.zwaveFirmware
+    version: 1
+  - id: heartsample19211.zwaveSecurity
+    version: 1
+  - id: heartsample19211.deviceNetworkId
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses2
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses3
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses4
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses5
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses6
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses7
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses8
     version: 1
   - id: refresh
     version: 1

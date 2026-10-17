@@ -1,0 +1,21 @@
+{
+  "name": "Zwave Firmware",
+  "attributes": {
+    "firmware": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "value"
+        ]
+      },
+      "enumCommands": []
+    }
+  },
+  "commands": {}
+}
