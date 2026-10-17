@@ -29,7 +29,6 @@ local WakeUp = (require "st.zwave.CommandClass.WakeUp")({ version=1 })
 local splitAssocString = require "split_assoc_string"
 local utilities = require "utilities"
 local delay_send = require "delay_send"
-local json = require "st.json"
 
 local associationGroups = {}
 local associationReportFragments = {}
@@ -112,38 +111,107 @@ end
 
 local function update_device_info_table(device)
   local store = device.st_store or {}
-  local function hex_or_unknown(value, width)
-    return type(value) == 'number' and string.format('%0' .. width .. 'X', value) or 'Unknown'
-  end
-  local device_info = 'Mfr:' .. hex_or_unknown(store.zwave_manufacturer_id, 4)
-    .. ' · Mdl:' .. hex_or_unknown(store.zwave_product_id, 4)
-  local firmware = (store.zwave_version or {}).firmware or {}
-  local fw_major = firmware.major
-  local fw_minor = firmware.minor
-  if fw_major and fw_minor then
-    device_info = device_info .. ' · FW:' .. fw_major .. '.' .. string.format('%02d', fw_minor)
-  end
-  local security = {}
-  for _, flag in pairs(store.zwave_security_flags or {}) do
-    table.insert(security, flag)
-  end
-  device_info = device_info .. ' · Sec:' .. (#security > 0 and table.concat(security, ',') or 'unknown')
 
-  local evt = capdefs.deviceInfo.deviceInformation({value = device_info})
-  evt.visibility = {displayed = false}
-  device:emit_event(evt)
-  local cc_list = {cc.ASSOCIATION, cc.MULTI_CHANNEL_ASSOCIATION, cc.ASSOCIATION_GRP_INFO, cc.ASSOCIATION_COMMAND_CONFIGURATION}
-  local cc_lines = {}
-  for _, c in ipairs(cc_list) do
-    if device:is_cc_supported(c) then
-      table.insert(cc_lines, string.format('%02X %s', c, tostring(cc._classes[c] or 'Unknown')))
+  local function hex_or_unknown(value, width)
+    return type(value) == "number" and string.format("%0" .. width .. "X", value) or "Unknown"
+  end
+
+  local function safe_text(value, fallback)
+    local value_type = type(value)
+    if value_type == "string" or value_type == "number" or value_type == "boolean" then
+      return tostring(value)
+    end
+    return fallback or "Unavailable"
+  end
+
+  local diagnostic_capabilities = {
+    fingerprint = capdefs.fingerprint,
+    firmware = capdefs.firmware,
+    security = capdefs.security,
+  }
+  local function emit_info(attribute, value)
+    local event = diagnostic_capabilities[attribute][attribute]({value = value})
+    event.visibility = {displayed = false}
+    local ok, err = pcall(device.emit_event, device, event)
+    if not ok then
+      log.warn("Unable to emit " .. attribute .. ": " .. tostring(err))
     end
   end
-  evt = capdefs.commandClasses.commandClasses({
-    value = #cc_lines > 0 and table.concat(cc_lines, ' · ') or 'No association command classes reported'
-  })
-  evt.visibility = {displayed = false}
-  device:emit_event(evt)
+
+  local fingerprint = hex_or_unknown(store.zwave_manufacturer_id, 4)
+    .. "-" .. hex_or_unknown(store.zwave_product_type, 4)
+    .. "-" .. hex_or_unknown(store.zwave_product_id, 4)
+
+  local firmware = (store.zwave_version or {}).firmware or {}
+  local firmware_text = "Unavailable"
+  if firmware.major and firmware.minor then
+    firmware_text = safe_text(firmware.major) .. "." .. safe_text(firmware.minor)
+  end
+
+  local security_flags = {}
+  for _, flag in pairs(store.zwave_security_flags or {}) do
+    if type(flag) == "string" or type(flag) == "number" then
+      table.insert(security_flags, tostring(flag))
+    end
+  end
+  local security = #security_flags > 0 and table.concat(security_flags, ", ") or "Unknown"
+
+  emit_info("fingerprint", fingerprint)
+  emit_info("firmware", firmware_text)
+  emit_info("security", security)
+
+
+  local node_id = tostring(device.device_network_id)
+  local node_event = capdefs.nodeId.deviceNetworkId(node_id)
+  local node_ok, node_err = pcall(
+    device.emit_component_event,
+    device,
+    device.profile.components.main,
+    node_event
+  )
+  if not node_ok then
+    log.warn("Unable to emit Device Network ID: " .. tostring(node_err))
+  end
+
+  local cc_lines = {}
+  for _, endpoint in ipairs(device.zwave_endpoints or {}) do
+    for _, command_class in ipairs(endpoint.command_classes or {}) do
+      if command_class.supported then
+        local name = safe_text(cc._classes[command_class.value], "Unknown")
+        table.insert(cc_lines, string.format(
+          "%02X %s%s",
+          command_class.value,
+          name,
+          command_class.secure and " / secure" or ""
+        ))
+      end
+    end
+  end
+  table.sort(cc_lines)
+  local command_class_pages = {
+    capdefs.commandClasses,
+    capdefs.commandClasses2,
+    capdefs.commandClasses3,
+    capdefs.commandClasses4,
+    capdefs.commandClasses5,
+    capdefs.commandClasses6,
+    capdefs.commandClasses7,
+    capdefs.commandClasses8,
+  }
+  for page, capability in ipairs(command_class_pages) do
+    local first = ((page - 1) * 2) + 1
+    local page_lines = {}
+    for index = first, math.min(first + 1, #cc_lines) do
+      table.insert(page_lines, cc_lines[index])
+    end
+    local value = #page_lines > 0 and table.concat(page_lines, "\n") or "No additional command classes"
+    local command_class_event = capability.commandClasses({value = value})
+    command_class_event.visibility = {displayed = false}
+    local classes_ok, classes_err = pcall(device.emit_event, device, command_class_event)
+    if not classes_ok then
+      log.warn("Unable to emit command classes page " .. page .. ": " .. tostring(classes_err))
+    end
+  end
 end
 
 --- @param driver st.zwave.Driver
