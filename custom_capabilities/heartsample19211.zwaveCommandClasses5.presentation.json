@@ -6,10 +6,10 @@
   },
   "detailView": [
     {
-      "label": "Device information",
+      "label": "Supported command classes 5",
       "displayType": "state",
       "state": {
-        "label": "{{deviceInformation.value}}"
+        "label": "{{commandClasses.value}}"
       }
     }
   ],
@@ -17,6 +17,6 @@
     "conditions": [],
     "actions": []
   },
-  "id": "heartsample19211.zwaveDeviceInformation",
+  "id": "heartsample19211.zwaveCommandClasses5",
   "version": 1
 }

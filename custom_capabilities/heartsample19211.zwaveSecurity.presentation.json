@@ -1,0 +1,22 @@
+{
+  "dashboard": {
+    "states": [],
+    "actions": [],
+    "panelItems": []
+  },
+  "detailView": [
+    {
+      "label": "Security",
+      "displayType": "state",
+      "state": {
+        "label": "{{security.value}}"
+      }
+    }
+  ],
+  "automation": {
+    "conditions": [],
+    "actions": []
+  },
+  "id": "heartsample19211.zwaveSecurity",
+  "version": 1
+}

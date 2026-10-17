@@ -1,0 +1,22 @@
+{
+  "dashboard": {
+    "states": [],
+    "actions": [],
+    "panelItems": []
+  },
+  "detailView": [
+    {
+      "label": "Fingerprint",
+      "displayType": "state",
+      "state": {
+        "label": "{{fingerprint.value}}"
+      }
+    }
+  ],
+  "automation": {
+    "conditions": [],
+    "actions": []
+  },
+  "id": "heartsample19211.zwaveFingerprint",
+  "version": 1
+}

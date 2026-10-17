@@ -1,7 +1,7 @@
 {
-  "name": "ZWave Device Information",
+  "name": "ZWave Command Classes 4",
   "attributes": {
-    "deviceInformation": {
+    "commandClasses": {
       "schema": {
         "type": "object",
         "properties": {
