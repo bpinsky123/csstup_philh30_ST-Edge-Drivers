@@ -1,6 +1,6 @@
 name: 'Z-Wave Explorer BP'
 packageKey: 'zwave-explorer'
 description: 'View z-wave device attributes.'
-vendorSupportInformation: 'Developer: h0ckeysk8er (Bruce Pinsky)<br><br><a href="https://github.com/bpinsky123/csstup_philh30_ST-Edge-Drivers">GitHub source</a>'
+vendorSupportInformation: 'Developer: h0ckeysk8er (Bruce Pinsky)<br><br><a href="https://github.com/bpinsky123/csstup_philh30_ST-Edge-Drivers/tree/zwave-explorer-bp-release">GitHub source</a>'
 permissions:
   zwave: {}
