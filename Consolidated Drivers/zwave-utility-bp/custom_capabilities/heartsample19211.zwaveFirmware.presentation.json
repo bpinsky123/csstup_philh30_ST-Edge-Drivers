@@ -1,0 +1,22 @@
+{
+  "dashboard": {
+    "states": [],
+    "actions": [],
+    "panelItems": []
+  },
+  "detailView": [
+    {
+      "label": "Firmware",
+      "displayType": "state",
+      "state": {
+        "label": "{{firmware.value}}"
+      }
+    }
+  ],
+  "automation": {
+    "conditions": [],
+    "actions": []
+  },
+  "id": "heartsample19211.zwaveFirmware",
+  "version": 1
+}

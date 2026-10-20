@@ -1,0 +1,21 @@
+{
+  "name": "ZWave Command Classes 13",
+  "attributes": {
+    "commandClasses": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "value"
+        ]
+      },
+      "enumCommands": []
+    }
+  },
+  "commands": {}
+}

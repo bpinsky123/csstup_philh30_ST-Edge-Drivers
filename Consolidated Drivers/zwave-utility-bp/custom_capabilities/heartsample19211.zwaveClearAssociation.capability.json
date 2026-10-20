@@ -1,0 +1,5 @@
+{
+  "name": "ZWave Clear Association",
+  "attributes": {},
+  "commands": {"clear": {"name": "clear", "arguments": [], "sensitive": false}}
+}

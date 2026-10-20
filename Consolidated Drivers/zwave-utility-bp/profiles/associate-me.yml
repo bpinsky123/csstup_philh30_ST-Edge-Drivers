@@ -1,0 +1,78 @@
+name: associate-me
+components:
+- id: main
+  label: Device capabilities and association groups
+  capabilities:
+  - id: heartsample19211.zwaveFingerprint
+    version: 1
+  - id: heartsample19211.zwaveFirmware
+    version: 1
+  - id: heartsample19211.zwaveSecurity
+    version: 1
+  - id: heartsample19211.deviceNetworkId
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses2
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses3
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses4
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses5
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses6
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses7
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses8
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses9
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses10
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses11
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses12
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses13
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses14
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses15
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses16
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses17
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses18
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses19
+    version: 1
+  - id: heartsample19211.zwaveCommandClasses20
+    version: 1
+  - id: heartsample19211.zwaveAssociationGroups
+    version: 1
+  - id: heartsample19211.zwaveAssociationGroups2
+    version: 1
+  - id: heartsample19211.zwaveAssociationGroups3
+    version: 1
+  - id: heartsample19211.zwaveAssociationGroups4
+    version: 1
+  - id: refresh
+    version: 1
+  categories:
+  - name: RemoteController
+- id: setAssociationGroup
+  label: Set association group
+  capabilities:
+  - id: heartsample19211.zwaveGroupSelector
+    version: 1
+  - id: heartsample19211.zwaveAssociationSet
+    version: 1
+  - id: heartsample19211.zwaveClearAssociation
+    version: 1
+  - id: refresh
+    version: 1
+  categories:
+  - name: RemoteController

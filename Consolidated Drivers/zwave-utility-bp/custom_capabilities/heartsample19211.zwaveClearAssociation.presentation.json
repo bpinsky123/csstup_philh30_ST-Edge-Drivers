@@ -1,0 +1,7 @@
+{
+  "dashboard": {"states": [], "actions": [], "panelItems": []},
+  "detailView": [{"label": "Clear selected group (except group 1)", "displayType": "pushButton", "pushButton": {"command": "clear"}}],
+  "automation": {"conditions": [], "actions": []},
+  "id": "heartsample19211.zwaveClearAssociation",
+  "version": 1
+}

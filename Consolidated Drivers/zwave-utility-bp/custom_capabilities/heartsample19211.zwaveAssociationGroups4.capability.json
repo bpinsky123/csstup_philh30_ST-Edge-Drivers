@@ -1,0 +1,21 @@
+{
+  "name": "ZWave Association Groups 4",
+  "attributes": {
+    "associationGroups": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "value"
+        ]
+      },
+      "enumCommands": []
+    }
+  },
+  "commands": {}
+}

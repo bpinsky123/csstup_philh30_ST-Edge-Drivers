@@ -1,0 +1,47 @@
+{
+  "dashboard": {
+    "states": [
+      {
+        "label": "Clear command queue"
+      }
+    ],
+    "actions": [
+      {
+        "displayType": "pushButton",
+        "pushButton": {
+          "command": "reset"
+        }
+      }
+    ],
+    "panelItems": []
+  },
+  "detailView": [
+    {
+      "label": "Clear command queue",
+      "displayType": "pushButton",
+      "pushButton": {
+        "command": "reset"
+      }
+    }
+  ],
+  "automation": {
+    "conditions": [],
+    "actions": [
+      {
+        "label": "Clear command queue",
+        "displayType": "list",
+        "list": {
+          "alternatives": [
+            {
+              "key": "reset",
+              "value": "Clear command queue",
+              "type": "active"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "id": "heartsample19211.zwaveReset",
+  "version": 1
+}

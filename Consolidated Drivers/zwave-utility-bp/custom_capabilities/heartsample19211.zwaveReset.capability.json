@@ -1,0 +1,11 @@
+{
+  "name": "ZWave Reset",
+  "attributes": {},
+  "commands": {
+    "reset": {
+      "name": "reset",
+      "arguments": [],
+      "sensitive": false
+    }
+  }
+}
